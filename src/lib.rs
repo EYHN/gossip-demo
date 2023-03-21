@@ -59,7 +59,7 @@ impl ExportedSimulator {
 
 #[wasm_bindgen]
 pub fn createSimulator() -> ExportedSimulator {
-    let num_nodes = 5;
+    let num_nodes = 3;
 
     // Create nodes
     let nodes: Vec<_> = (0..num_nodes)

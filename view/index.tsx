@@ -16,6 +16,7 @@ export interface ViewState {
     from: string
     to: string
     progress: number
+    kind: string
   }[]
   time: number
 }
@@ -26,7 +27,7 @@ rust
   .then((simulator) => {
     const App = () => {
       const [state, setState] = useState<ViewState>()
-      const [clientState, setClientState] = useState<any>()
+      const [clientState, setClientState] = useState<any[]>()
       const [selectId, setSelectId] = useState<string | null>(null)
       const [speed, setSpeed] = useState<number>(10)
       useEffect(() => {
@@ -37,8 +38,11 @@ rust
             prevTime = time
           } else {
             simulator.tick(((time - prevTime) / 1000) * (speed / 10))
-            setState(simulator.debug())
-            if (selectId) setClientState(simulator.debug_client(selectId))
+            const state = simulator.debug() as ViewState
+            setState(state)
+            setClientState(
+              state.clients.map((c) => simulator.debug_client(c.id))
+            )
             prevTime = time
           }
           animationFrameRequest = requestAnimationFrame(loop)
@@ -90,7 +94,13 @@ rust
                 <button onClick={handleAddRandomKeyValueToSelect}>
                   Add random key-value
                 </button>
-                <JsonViewer editable value={clientState} />
+                {clientState?.map((s) => (
+                  <JsonViewer
+                    editable
+                    value={s}
+                    style={{ height: 500 }}
+                  />
+                ))}
               </>
             )}
           </div>

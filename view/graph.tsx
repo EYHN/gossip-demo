@@ -7,12 +7,33 @@ const outlineFilterPri = new OutlineFilter(2, 0x9c27b0)
 const outlineFilterBlue = new OutlineFilter(2, 0x3949ab)
 const outlineFilterWrite = new OutlineFilter(2, 0xffffff)
 
+const termColors = [
+  '#66c2a5',
+  '#fc8d62',
+  '#8da0cb',
+  '#e78ac3',
+  '#a6d854',
+  '#ffd92f',
+]
+
+function selectColor(a: string) {
+  let t = 0
+  for (let i = 0; i < a.length; i++) {
+    t += a.charCodeAt(i)
+  }
+  return termColors[t % termColors.length | 0]
+}
+
 interface GraphState extends ViewState {
   selectId?: string | null
 }
 
 function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
-  const app = new PIXI.Application({ background: '#ed225d' })
+  const app = new PIXI.Application({
+    background: '#ed225d',
+    width: 300,
+    height: 300,
+  })
   app.stage.interactive = true
   app.stage.hitArea = app.screen
   app.stage.sortableChildren = true
@@ -62,7 +83,7 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
   }
 
   function handlePointerLeaveRect(rect: PIXI.DisplayObject) {
-    rect.filters = [outlineFilterPri]
+    rect.filters = []
   }
 
   let rects: {
@@ -98,16 +119,17 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
         container.on('pointerdown', (e) => handleDragStart(e, container))
         container.on('pointerenter', () => handlePointerEnterRect(container))
         container.on('pointerleave', () => handlePointerLeaveRect(container))
-        container.on('click', () => onSelect?.(client.id))
-        container.filters = [outlineFilterPri]
+        container.on('pointertap', () => onSelect?.(client.id))
+        container.filters = []
       }
 
-      r.rect.beginFill(0xf47a9e)
+      r.rect.beginFill(selectColor(client.hash))
+      r.rect.lineStyle(2, state.selectId === client.id ? 0xffe0b2 : 0x9c27b0)
       r.rect.drawRect(0, 0, 50, 50)
       r.rect.endFill()
       r.rect.x = 0
       r.rect.y = 0
-      r.text.text = client.hash.slice(0, 2)
+      r.text.text = client.id.slice(0, 2)
       r.text.anchor.set(0.5, 0.5)
       r.text.x = 25
       r.text.y = 25
@@ -207,7 +229,7 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
       i++
 
       point.lineStyle(0)
-      point.beginFill(0x9fa8da, 1)
+      point.beginFill(selectColor(message.kind), 1)
       point.drawCircle(0, 0, 10)
       point.endFill()
       point.zIndex = 0
