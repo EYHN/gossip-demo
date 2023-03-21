@@ -4,6 +4,7 @@ const webpack = require('webpack')
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin')
 
 module.exports = {
+  mode: process.env.NODE_ENV || 'development',
   entry: './view/index.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
