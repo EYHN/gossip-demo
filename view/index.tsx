@@ -1,8 +1,8 @@
-import { JsonViewer } from '@textea/json-viewer'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Graph } from './graph'
 import { faker } from '@faker-js/faker'
+import { DataViewer } from './data-viewer'
 
 const rust = import('../pkg')
 
@@ -27,9 +27,9 @@ rust
   .then((simulator) => {
     const App = () => {
       const [state, setState] = useState<ViewState>()
-      const [clientState, setClientState] = useState<any[]>()
       const [selectId, setSelectId] = useState<string | null>(null)
       const [speed, setSpeed] = useState<number>(10)
+
       useEffect(() => {
         let animationFrameRequest = 0
         let prevTime: number | null = null
@@ -40,25 +40,17 @@ rust
             simulator.tick(((time - prevTime) / 1000) * (speed / 10))
             const state = simulator.debug() as ViewState
             setState(state)
-            setClientState(
-              state.clients.map((c) => simulator.debug_client(c.id))
-            )
             prevTime = time
           }
           animationFrameRequest = requestAnimationFrame(loop)
         }
         animationFrameRequest = requestAnimationFrame(loop)
         return () => cancelAnimationFrame(animationFrameRequest)
-      }, [speed, selectId])
+      }, [speed])
 
-      const handleAddRandomKeyValueToSelect = useCallback(() => {
-        if (selectId)
-          simulator.set_kv(
-            selectId,
-            faker.name.firstName(),
-            faker.name.lastName()
-          )
-      }, [selectId])
+      const handleAddRandomKeyValue = useCallback((id: string) => {
+        simulator.set_kv(id, faker.name.firstName(), faker.name.lastName())
+      }, [])
 
       const handleSelectClient = useCallback((selectId: string) => {
         setSelectId(selectId)
@@ -89,20 +81,12 @@ rust
               state={{ ...state, selectId }}
               onSelect={handleSelectClient}
             ></Graph>
-            {selectId && (
-              <>
-                <button onClick={handleAddRandomKeyValueToSelect}>
-                  Add random key-value
-                </button>
-                {clientState?.map((s) => (
-                  <JsonViewer
-                    editable
-                    value={s}
-                    style={{ height: 500 }}
-                  />
-                ))}
-              </>
-            )}
+            <DataViewer
+              simulator={simulator}
+              state={state}
+              style={{ height: 500 }}
+              onClickAdd={handleAddRandomKeyValue}
+            />
           </div>
         )
       }
