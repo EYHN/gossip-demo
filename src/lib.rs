@@ -74,9 +74,9 @@ pub fn createSimulator() -> ExportedSimulator {
             .map(|n| GossipProtocolClient::new(n, options.clone()))
             .collect(),
         GossipSimulatorOptions {
-            messageDelay: 1.0,
-            clientTimer: 3.0,
-            clientTimerRandom: 1.0,
+            message_delay: 1.0,
+            client_timer: 3.0,
+            client_timer_random: 1.0,
         },
     );
 

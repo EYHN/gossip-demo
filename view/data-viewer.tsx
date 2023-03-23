@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { JsonViewer } from '@textea/json-viewer'
 import React from 'react'
 import { Virtuoso } from 'react-virtuoso'
@@ -8,12 +9,11 @@ export const DataViewer = ({
   simulator,
   state,
   style,
-  onClickAdd,
+  onUpdate,
 }: {
   simulator: ExportedSimulator
   state: ViewState
   style?: React.CSSProperties
-  onClickAdd?: (id: string) => void
   onUpdate?: (id: string, k: string, v: string) => void
 }) => {
   return (
@@ -22,13 +22,13 @@ export const DataViewer = ({
       totalCount={state.clients.length}
       itemContent={(index) => (
         <div style={{ display: 'flex', flexDirection: 'column', height: 200 }}>
-          <button onClick={() => onClickAdd?.(state.clients[index].id)}>
+          <button onClick={() => onUpdate?.(state.clients[index].id, faker.word.noun(), faker.word.noun())}>
             Add random key-value
           </button>
           <JsonViewer
             editable
-            onChange={console.log}
-            value={simulator.debug_client(state.clients[index].id)}
+            onChange={([k], _, v) => onUpdate?.(state.clients[index].id, k.toString(), v + '')}
+            value={Object.fromEntries(simulator.debug_client(state.clients[index].id).entries())}
             style={{ flex: '1' }}
           />
         </div>

@@ -3,9 +3,10 @@ import { OutlineFilter } from '@pixi/filter-outline'
 import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import { ViewState } from '.'
 
-const outlineFilterPri = new OutlineFilter(2, 0x9c27b0)
-const outlineFilterBlue = new OutlineFilter(2, 0x3949ab)
-const outlineFilterWrite = new OutlineFilter(2, 0xffffff)
+const devicePixelRatio = window.devicePixelRatio || 1;
+
+const outlineFilterBlue = new OutlineFilter(1 * devicePixelRatio, 0x3949ab)
+const outlineFilterWrite = new OutlineFilter(1 * devicePixelRatio, 0xffffff)
 
 const termColors = [
   '#66c2a5',
@@ -31,13 +32,20 @@ interface GraphState extends ViewState {
 function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
   const app = new PIXI.Application({
     background: '#ed225d',
-    width: 300,
-    height: 300,
+    width: 300 * devicePixelRatio,
+    height: 300 * devicePixelRatio,
+    antialias: true,
   })
   app.stage.interactive = true
   app.stage.hitArea = app.screen
   app.stage.sortableChildren = true
 
+  app.stage.scale = {
+    x: devicePixelRatio,
+    y: devicePixelRatio,
+  }
+  app.view.style!.width = '300px'
+  app.view.style!.height = '300px'
   target.appendChild(app.view as any)
 
   let dragTarget: PIXI.DisplayObject | null = null
@@ -110,9 +118,9 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
         r = rects[i]
         app.stage.addChild(container)
         container.x =
-          Math.random() * (app.screen.width / 2) + app.screen.width * 0.25
+          Math.random() * (app.stage.width / 2) + app.stage.width * 0.25
         container.y =
-          Math.random() * (app.screen.height / 2) + app.screen.height * 0.25
+          Math.random() * (app.stage.height / 2) + app.stage.height * 0.25
         container.interactive = true
         container.cursor = 'pointer'
         container.zIndex = 1
@@ -124,7 +132,7 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
       }
 
       r.rect.beginFill(selectColor(client.hash))
-      r.rect.lineStyle(2, state.selectId === client.id ? 0xffe0b2 : 0x9c27b0)
+      r.rect.lineStyle(1 * devicePixelRatio, state.selectId === client.id ? 0xffe0b2 : 0x9c27b0)
       r.rect.drawRect(0, 0, 50, 50)
       r.rect.endFill()
       r.rect.x = 0
@@ -133,6 +141,7 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
       r.text.anchor.set(0.5, 0.5)
       r.text.x = 25
       r.text.y = 25
+      r.text.resolution = devicePixelRatio
     }
 
     rects
@@ -170,14 +179,14 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
         ) {
           continue
         }
-        path.lineStyle(2, 0xffffff, 0.5)
+        path.lineStyle(1 * devicePixelRatio, 0xffffff, 0.5)
         const fromPoint = new PIXI.Point(
-          fromRect.container.x + fromRect.container.getBounds().width / 2,
-          fromRect.container.y + fromRect.container.getBounds().height / 2
+          fromRect.container.x + fromRect.container.getLocalBounds().width / 2,
+          fromRect.container.y + fromRect.container.getLocalBounds().height / 2
         )
         const toPoint = new PIXI.Point(
-          toRect.container.x + toRect.container.getBounds().width / 2,
-          toRect.container.y + toRect.container.getBounds().height / 2
+          toRect.container.x + toRect.container.getLocalBounds().width / 2,
+          toRect.container.y + toRect.container.getLocalBounds().height / 2
         )
         path.moveTo(fromPoint.x, fromPoint.y)
         path.lineTo(toPoint.x, toPoint.y)
@@ -198,12 +207,12 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
       const toRect = rects[state.clients.findIndex((c) => c.id === message.to)]
 
       const fromPoint = new PIXI.Point(
-        fromRect.container.x + fromRect.container.getBounds().width / 2,
-        fromRect.container.y + fromRect.container.getBounds().height / 2
+        fromRect.container.x + fromRect.container.getLocalBounds().width / 2,
+        fromRect.container.y + fromRect.container.getLocalBounds().height / 2
       )
       const toPoint = new PIXI.Point(
-        toRect.container.x + toRect.container.getBounds().width / 2,
-        toRect.container.y + toRect.container.getBounds().height / 2
+        toRect.container.x + toRect.container.getLocalBounds().width / 2,
+        toRect.container.y + toRect.container.getLocalBounds().height / 2
       )
 
       const messagePoint = {
@@ -228,7 +237,7 @@ function createPIXIApp(target: HTMLElement, onSelect?: (id: string) => void) {
       }
       i++
 
-      point.lineStyle(0)
+      point.lineStyle(1)
       point.beginFill(selectColor(message.kind), 1)
       point.drawCircle(0, 0, 10)
       point.endFill()

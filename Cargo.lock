@@ -84,7 +84,6 @@ dependencies = [
 [[package]]
 name = "gossip"
 version = "0.1.0"
-source = "git+https://github.com/EYHN/gossip.git?branch=main#0b8df3a01fe7c860a185cdc993003f9756a6bd0d"
 dependencies = [
  "crdts",
  "rand 0.8.5",
